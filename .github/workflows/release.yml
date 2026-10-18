@@ -32,7 +32,13 @@ jobs:
         uses: android-actions/setup-android@v4
 
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-37" "build-tools;36.0.0"
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Android 17 / API 37 packages may be published in the preview channel.
+          sdkmanager --channel=3 "platform-tools" "platforms;android-37" "build-tools;37.0.0"
+          test -f "$ANDROID_HOME/platforms/android-37/android.jar"
+          test -x "$ANDROID_HOME/build-tools/37.0.0/apksigner"
 
       - name: Set up Gradle and caching
         uses: gradle/actions/setup-gradle@v6
@@ -66,7 +72,7 @@ jobs:
           set -euo pipefail
           apk="app/build/outputs/apk/release/app-release.apk"
           test -s "$apk"
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$apk"
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose "$apk"
           cp "$apk" "$RUNNER_TEMP/Hisn-Browser-release.apk"
 
       - name: Publish signed GitHub Release
