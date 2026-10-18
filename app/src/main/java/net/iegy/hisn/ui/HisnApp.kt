@@ -37,7 +37,7 @@ import net.iegy.hisn.screens.SettingsScreen
 import net.iegy.hisn.screens.TabsScreen
 import android.content.Intent
 
-internal enum class AppPage { BROWSER, TABS, BOOKMARKS, HISTORY, DOWNLOADS, SETTINGS, ABOUT, PRIVACY }
+ enum class AppPage { BROWSER, TABS, BOOKMARKS, HISTORY, DOWNLOADS, SETTINGS, ABOUT, PRIVACY }
 
 @Composable
 fun HisnApp(
