@@ -1,0 +1,21 @@
+# Common ad/tracker domains (starter list; maintained locally)
+doubleclick.net
+googlesyndication.com
+adservice.google.com
+adservice.google.com.eg
+googletagservices.com
+adnxs.com
+adsrvr.org
+scorecardresearch.com
+quantserve.com
+outbrain.com
+taboola.com
+criteo.com
+connect.facebook.net
+facebook.net
+analytics.google.com
+google-analytics.com
+hotjar.com
+mixpanel.com
+segment.io
+segment.com

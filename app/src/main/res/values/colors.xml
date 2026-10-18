@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="hisn_forest">#103C2F</color>
+    <color name="hisn_emerald">#1BA875</color>
+    <color name="hisn_mint">#DFF4E9</color>
+    <color name="hisn_off_white">#F7F8F4</color>
+    <color name="hisn_charcoal">#121B18</color>
+    <color name="hisn_grey">#7C8782</color>
+    <color name="hisn_white">#FFFFFF</color>
+</resources>
