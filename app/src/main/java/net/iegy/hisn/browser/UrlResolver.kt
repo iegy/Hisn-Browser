@@ -3,7 +3,6 @@ package net.iegy.hisn.browser
 import java.net.IDN
 import java.net.URI
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 object UrlResolver {
     private val hostPattern = Regex("^(?=.{1,253}$)(localhost|(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,63}|(?:\\d{1,3}\\.){3}\\d{1,3})(?::\\d{1,5})?(?:[/?#].*)?$")
@@ -35,7 +34,7 @@ object UrlResolver {
     }
 
     fun searchUrl(query: String, engine: String): String {
-        val encoded = URLEncoder.encode(query, StandardCharsets.UTF_8).replace("+", "%20")
+                val encoded = URLEncoder.encode(query, "UTF-8").replace("+", "%20")
         return when (engine.lowercase()) {
             "bing" -> "https://www.bing.com/search?q=$encoded"
             "duckduckgo", "duck duck go" -> "https://duckduckgo.com/?q=$encoded"
