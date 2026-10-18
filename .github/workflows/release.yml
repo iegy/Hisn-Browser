@@ -1,0 +1,106 @@
+name: Tagged Android release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK tools
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-37" "build-tools;36.0.0"
+
+      - name: Set up Gradle and caching
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.3.1'
+          cache-provider: basic
+
+      - name: Check and prepare release signing
+        id: signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "$ANDROID_KEYSTORE_BASE64" && -n "$KEYSTORE_PASSWORD" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" ]]; then
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/hisn-release.keystore"
+            chmod 600 "$RUNNER_TEMP/hisn-release.keystore"
+            echo "HISN_KEYSTORE_PATH=$RUNNER_TEMP/hisn-release.keystore" >> "$GITHUB_ENV"
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Signing secrets are incomplete; a signed release will not be published." 
+          fi
+
+      - name: Test and build signed release APK
+        if: steps.signing.outputs.configured == 'true'
+        run: gradle testDebugUnitTest lintRelease assembleRelease --no-daemon
+
+      - name: Verify signed release APK
+        if: steps.signing.outputs.configured == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="app/build/outputs/apk/release/app-release.apk"
+          test -s "$apk"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$apk"
+          cp "$apk" "$RUNNER_TEMP/Hisn-Browser-release.apk"
+
+      - name: Publish signed GitHub Release
+        if: steps.signing.outputs.configured == 'true' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: ${{ runner.temp }}/Hisn-Browser-release.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload signed APK for manual non-tag runs
+        if: steps.signing.outputs.configured == 'true' && !startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v7
+        with:
+          name: Hisn-Browser-signed-release-manual
+          path: ${{ runner.temp }}/Hisn-Browser-release.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Build debug fallback (no signing secrets)
+        if: steps.signing.outputs.configured != 'true'
+        run: gradle testDebugUnitTest lintDebug assembleDebug --no-daemon
+
+      - name: Upload debug APK when signing is not configured
+        if: steps.signing.outputs.configured != 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Hisn-Browser-debug-unsigned-release-tag
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Clean temporary keystore
+        if: always()
+        shell: bash
+        run: rm -f "$RUNNER_TEMP/hisn-release.keystore" "$RUNNER_TEMP/Hisn-Browser-release.apk"
