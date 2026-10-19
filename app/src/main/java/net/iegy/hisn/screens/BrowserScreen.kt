@@ -88,6 +88,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import net.iegy.hisn.R
 import net.iegy.hisn.browser.BrowserSession
 import net.iegy.hisn.browser.BrowserTab
+import net.iegy.hisn.browser.MediaItem
 import net.iegy.hisn.data.BrowserRepository
 import net.iegy.hisn.data.BrowserSettings
 import net.iegy.hisn.data.SettingsRepository
@@ -123,6 +124,8 @@ fun BrowserScreen(
     var showShortcutDialog by remember { mutableStateOf(false) }
     var shortcutTitle by remember { mutableStateOf("") }
     var shortcutUrl by remember { mutableStateOf("") }
+    var showMediaDialog by remember { mutableStateOf(false) }
+    var mediaItems by remember { mutableStateOf<List<MediaItem>>(emptyList()) }
 
     LaunchedEffect(tab?.id, tab?.url) {
         if (!editingAddress) address = tab?.url.orEmpty()
@@ -222,6 +225,22 @@ fun BrowserScreen(
             }
         }
 
+        val detectedMedia = tab?.media?.size ?: 0
+        if (detectedMedia > 0) {
+            Surface(
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                modifier = Modifier.fillMaxWidth().clickable {
+                    session.scanMedia { items -> mediaItems = items; showMediaDialog = true }
+                }
+            ) {
+                Row(Modifier.padding(horizontal = 12.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(7.dp))
+                    Text(stringResource(R.string.video_detected, detectedMedia), style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+
         if (privateMode) {
             Surface(color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxWidth()) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -292,6 +311,14 @@ fun BrowserScreen(
                 session.message.contains("Download could not", ignoreCase = true) -> stringResource(R.string.download_failed)
                 session.message.contains("Maximum of", ignoreCase = true) -> stringResource(R.string.close_all_tabs)
                 session.message.contains("Only HTTP", ignoreCase = true) -> stringResource(R.string.invalid_address)
+                session.message.contains("Popup blocked", ignoreCase = true) -> stringResource(R.string.popup_blocked)
+                session.message.contains("Redirect blocked", ignoreCase = true) -> stringResource(R.string.redirect_blocked)
+                session.message.contains("Video download started", ignoreCase = true) -> stringResource(R.string.video_started)
+                session.message.startsWith("Downloading video") ->
+                    stringResource(R.string.video_progress, session.message.filter { it.isDigit() })
+                session.message.startsWith("Video saved") -> stringResource(R.string.video_saved)
+                session.message.startsWith("Video unsupported") -> stringResource(R.string.video_unsupported)
+                session.message.contains("Video download failed", ignoreCase = true) -> stringResource(R.string.video_failed)
                 else -> session.message
             }
             Surface(color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth().clickable { session.clearMessage() }) {
@@ -327,6 +354,10 @@ fun BrowserScreen(
                         MenuItem(R.string.bookmarks, Icons.Default.Star) { onNavigate(AppPage.BOOKMARKS); menuExpanded = false }
                         MenuItem(R.string.history, Icons.Default.History) { onNavigate(AppPage.HISTORY); menuExpanded = false }
                         MenuItem(R.string.downloads, Icons.Default.Download) { onNavigate(AppPage.DOWNLOADS); menuExpanded = false }
+                        MenuItem(R.string.download_video, Icons.Default.Download) {
+                            session.scanMedia { items -> mediaItems = items; showMediaDialog = true }
+                            menuExpanded = false
+                        }
                         MenuItem(R.string.copy_url, Icons.Default.ContentCopy) {
                             session.selectedTab?.url?.takeIf { it.isNotBlank() }?.let { clipboard.setText(AnnotatedString(it)); onToast(it) }
                             menuExpanded = false
@@ -365,6 +396,28 @@ fun BrowserScreen(
                 }
             }
         }
+    }
+
+    if (showMediaDialog) {
+        AlertDialog(
+            onDismissRequest = { showMediaDialog = false },
+            title = { Text(stringResource(R.string.download_video)) },
+            text = {
+                if (mediaItems.isEmpty()) {
+                    Text(stringResource(R.string.no_video_found))
+                } else {
+                    Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        mediaItems.forEach { item ->
+                            TextButton(
+                                onClick = { session.downloadMedia(item); showMediaDialog = false },
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text(item.label(), maxLines = 2) }
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showMediaDialog = false }) { Text(stringResource(R.string.cancel)) } }
+        )
     }
 
     if (showBookmarkDialog) {

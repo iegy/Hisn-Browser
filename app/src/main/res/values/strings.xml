@@ -101,4 +101,14 @@
     <string name="privacy_connections">HTTPS certificate errors are not bypassed. HTTP pages are supported but are not encrypted. The built-in tracker blocker uses a small local domain list and cannot block every ad or tracker. Websites may still receive the requests needed to deliver pages you visit.</string>
     <string name="privacy_permissions">Website camera and microphone requests are denied by default in this version. Supported file upload selectors are forwarded to Android’s file picker.</string>
     <string name="privacy_controls">You can delete individual bookmarks and history entries, clear regular history, and clear cached WebView content in Settings. Clearing cache does not clear cookies or saved website logins.</string>
+    <string name="download_video">Download video</string>
+    <string name="video_detected">Video detected (%1$d) — tap to download</string>
+    <string name="no_video_found">No downloadable video found on this page. Streams that are DRM-protected, live, or served as blob/YouTube-style streams are not supported.</string>
+    <string name="popup_blocked">Popup blocked</string>
+    <string name="redirect_blocked">Automatic redirect blocked (add the site to the allowlist if it is legitimate)</string>
+    <string name="video_started">Video download started…</string>
+    <string name="video_progress">Downloading video %1$s%%</string>
+    <string name="video_saved">Video saved to Downloads</string>
+    <string name="video_unsupported">This video stream cannot be downloaded (live or protected).</string>
+    <string name="video_failed">Video download failed</string>
 </resources>

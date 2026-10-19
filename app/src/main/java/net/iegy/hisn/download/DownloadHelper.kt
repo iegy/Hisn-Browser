@@ -23,7 +23,8 @@ object DownloadHelper {
         url: String,
         userAgent: String?,
         contentDisposition: String?,
-        mimeType: String?
+        mimeType: String?,
+        referer: String? = null
     ): Long? {
         if (!url.startsWith("https://", true) && !url.startsWith("http://", true)) return null
         return try {
@@ -35,6 +36,7 @@ object DownloadHelper {
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, safeName)
             if (!mimeType.isNullOrBlank()) request.setMimeType(mimeType)
             if (!userAgent.isNullOrBlank()) request.addRequestHeader("User-Agent", userAgent)
+            if (!referer.isNullOrBlank()) request.addRequestHeader("Referer", referer)
             CookieManager.getInstance().getCookie(url)?.takeIf { it.isNotBlank() }?.let {
                 request.addRequestHeader("Cookie", it)
             }

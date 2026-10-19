@@ -101,4 +101,14 @@
     <string name="privacy_connections">لا يتم تجاوز أخطاء شهادات HTTPS. يمكن فتح صفحات HTTP لكنها غير مشفّرة. يستخدم مانع التتبّع المدمج قائمة محلية صغيرة من النطاقات ولا يستطيع حظر جميع الإعلانات أو أدوات التتبّع. قد تتلقى المواقع الطلبات اللازمة لعرض الصفحات التي تزورها.</string>
     <string name="privacy_permissions">يُرفض افتراضيًا في هذا الإصدار طلب المواقع استخدام الكاميرا والميكروفون. يتم تمرير أدوات اختيار الملفات المدعومة إلى منتقي الملفات في Android.</string>
     <string name="privacy_controls">يمكنك حذف مواقع المفضّلة والسجل بشكل فردي، ومسح السجل العادي، ومسح محتوى WebView المخزّن مؤقتًا من الإعدادات. مسح الذاكرة المؤقتة لا يحذف ملفات تعريف الارتباط أو تسجيلات الدخول المحفوظة.</string>
+    <string name="download_video">تحميل الفيديو</string>
+    <string name="video_detected">تم اكتشاف فيديو (%1$d) — اضغط للتحميل</string>
+    <string name="no_video_found">لم يتم العثور على فيديو قابل للتحميل في هذه الصفحة. البث المحمي (DRM) أو المباشر أو بنمط blob/يوتيوب غير مدعوم.</string>
+    <string name="popup_blocked">تم حظر نافذة منبثقة</string>
+    <string name="redirect_blocked">تم حظر تحويل تلقائي (أضف الموقع إلى القائمة المسموحة إن كان موثوقًا)</string>
+    <string name="video_started">بدأ تحميل الفيديو…</string>
+    <string name="video_progress">جارٍ تحميل الفيديو %1$s%%</string>
+    <string name="video_saved">تم حفظ الفيديو في مجلد التنزيلات</string>
+    <string name="video_unsupported">لا يمكن تحميل هذا البث (مباشر أو محمي).</string>
+    <string name="video_failed">فشل تحميل الفيديو</string>
 </resources>
